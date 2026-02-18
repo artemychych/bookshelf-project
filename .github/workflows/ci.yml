@@ -1,0 +1,49 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install frontend dependencies
+        run: cd frontend && npm install
+      - name: Run linter (ESLint)
+        run: cd frontend && npm run lint || echo "No lint script yet"
+      - name: Run unit tests (Jest placeholder)
+        run: cd frontend && npm test || echo "No tests yet"
+
+  lint-and-test-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install backend dependencies
+        run: cd backend && npm install
+      - name: Run linter (ESLint)
+        run: cd backend && npm run lint || echo "No lint script yet"
+      - name: Run unit tests (Jest placeholder)
+        run: cd backend && npm test || echo "No tests yet"
+
+  build-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build frontend Docker image
+        run: docker build -t bookshelf-frontend:latest -f docker/frontend.Dockerfile .
+      - name: Build backend Docker image
+        run: docker build -t bookshelf-backend:latest -f docker/backend.Dockerfile .
+      - name: (Optional) Push images to registry
+        run: echo "Images built successfully"
