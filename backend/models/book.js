@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
       description: DataTypes.TEXT,
       publishedYear: DataTypes.INTEGER,
       coverUrl: DataTypes.STRING,
-      status: DataTypes.ENUM,
+      status: DataTypes.ENUM("want_to_read", "reading", "read"),
     },
     {
       sequelize,
