@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16
+    container_name: bookshelf_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"   # БД доступна только локально для бэкапов
+    networks:
+      - bookshelf_network
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    container_name: bookshelf_backend
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}
+      DB_HOST: db                # важно: имя сервиса, а не localhost
+      DB_PORT: 5432
+      PORT: 5000
+    # Не открываем порт бэкенда наружу – он работает только внутри сети Docker
+    networks:
+      - bookshelf_network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    container_name: bookshelf_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"                  # Открываем порт 80 на хосте
+    networks:
+      - bookshelf_network
+
+volumes:
+  postgres_data:
+
+networks:
+  bookshelf_network:
+    driver: bridge

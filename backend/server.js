@@ -15,7 +15,7 @@ app.get("/", (req, res) => {
 
 // Подключаем маршруты (пока пусто)
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 6636;
 app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
   try {
