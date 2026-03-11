@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "/api", // через прокси
+  baseURL: "/api",
 });
 
 export default api;
