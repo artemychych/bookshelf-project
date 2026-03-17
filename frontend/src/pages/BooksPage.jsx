@@ -84,7 +84,7 @@ const BooksPage = () => {
         <button 
           onClick={() => setMode('discover')}
           style={{ 
-            padding: '10px 20px', 
+            padding: '20px 20px', 
             marginRight: '10px',
             fontWeight: mode === 'discover' ? 'bold' : 'normal',
             backgroundColor: mode === 'discover' ? '#007bff' : '#6c757d',
