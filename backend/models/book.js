@@ -24,7 +24,11 @@ module.exports = (sequelize, DataTypes) => {
       description: DataTypes.TEXT,
       publishedYear: DataTypes.INTEGER,
       coverUrl: DataTypes.STRING,
-      status: DataTypes.ENUM("want_to_read", "reading", "read"),
+      status: {
+        type: DataTypes.ENUM("want_to_read", "reading", "read"),
+        defaultValue: "want_to_read",
+      },
+      externalId: DataTypes.STRING, // для хранения ID из Open Library
     },
     {
       sequelize,
@@ -33,10 +37,10 @@ module.exports = (sequelize, DataTypes) => {
   );
   return Book;
   /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     * Крутая модель очень жеская 
-     * Попытка
-     */
+   * Helper method for defining associations.
+   * This method is not a part of Sequelize lifecycle.
+   * The `models/index` file will call this method automatically.
+   * Крутая модель очень жеская
+   * Попытка
+   */
 };
