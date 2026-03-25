@@ -5,5 +5,5 @@ const { register, login } = require("../controllers/authController");
 
 router.post("/register", register);
 router.post("/login", login);
-
+//пароль: d7Zn0KYF632q8OxcUf
 module.exports = router;
