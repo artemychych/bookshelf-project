@@ -31,6 +31,8 @@ services:
       DB_HOST: db                # важно: имя сервиса, а не localhost
       DB_PORT: 5432
       PORT: 5000
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
     # Не открываем порт бэкенда наружу – он работает только внутри сети Docker
     networks:
       - bookshelf_network

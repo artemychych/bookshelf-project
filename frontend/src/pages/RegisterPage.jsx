@@ -1,7 +1,7 @@
-// frontend/src/pages/RegisterPage.jsx
+// pages/RegisterPage.jsx
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../services/api'; // настроенный экземпляр axios
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +13,7 @@ const RegisterPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const handleChange = (e) => {
     setFormData({
@@ -25,7 +26,6 @@ const RegisterPage = () => {
     e.preventDefault();
     setError('');
 
-    // Простейшая валидация
     if (formData.password !== formData.confirmPassword) {
       setError('Пароли не совпадают');
       return;
@@ -33,20 +33,9 @@ const RegisterPage = () => {
 
     setLoading(true);
     try {
-      // Отправляем POST-запрос на /auth/register (эндпоинт пока не реализован)
-      // Здесь можно заменить на реальный вызов, когда бэкенд будет готов
-      const response = await api.post('/auth/register', {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-      });
-
-      console.log('Registration successful', response.data);
-      // Если есть токен, сохраняем его (например, в localStorage)
-      // localStorage.setItem('token', response.data.token);
-
-      // Перенаправляем на главную или на страницу входа
-      navigate('/login');
+      await register(formData.name, formData.email, formData.password);
+      // После успешной регистрации пользователь уже авторизован
+      navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Ошибка регистрации');
     } finally {
@@ -122,6 +111,9 @@ const RegisterPage = () => {
         >
           {loading ? 'Регистрация...' : 'Зарегистрироваться'}
         </button>
+        <div style={{ marginTop: '15px', textAlign: 'center' }}>
+          <Link to="/login">Уже есть аккаунт? Войдите</Link>
+        </div>
       </form>
     </div>
   );

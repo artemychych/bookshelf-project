@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
+const authMiddleware = require("../middleware/auth");
 const { Book, Author, sequelize } = require("../models");
+
+router.use(authMiddleware);
 
 // GET /books – получить все книги
 router.get("/", async (req, res) => {
