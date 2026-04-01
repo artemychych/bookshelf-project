@@ -2,9 +2,11 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const { sequelize } = require("./models");
+const authRoutes = require("./routes/auth");
 
 dotenv.config();
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
@@ -15,7 +17,7 @@ app.get("/", (req, res) => {
 
 // Подключаем маршруты (пока пусто)
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 6636;
 app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
   try {
@@ -28,3 +30,4 @@ app.listen(PORT, async () => {
 
 const booksRouter = require("./routes/books");
 app.use("/api/books", booksRouter);
+app.use("/api/auth", authRoutes);

@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { Book, Author } = require("../models");
+const authMiddleware = require("../middleware/auth");
+const { Book, Author, sequelize } = require("../models");
+
+router.use(authMiddleware);
 
 // GET /books – получить все книги
 router.get("/", async (req, res) => {
@@ -27,14 +30,44 @@ router.get("/:id", async (req, res) => {
 
 // POST /books – создать новую книгу
 router.post("/", async (req, res) => {
+  const t = await sequelize.transaction();
   try {
-    const book = await Book.create(req.body);
-    // Если переданы авторы, можно добавить связи через BookAuthor
-    if (req.body.authorIds) {
-      await book.setAuthors(req.body.authorIds);
+    // Проверяем, есть ли уже книга с таким externalId
+    let book = null;
+    if (req.body.externalId) {
+      book = await Book.findOne({ where: { externalId: req.body.externalId } });
     }
-    res.status(201).json(book);
+
+    if (!book) {
+      // Создаём новую книгу
+      book = await Book.create(req.body, { transaction: t });
+    } else {
+      // Если книга уже есть, можно обновить её поля (опционально)
+      await book.update(req.body, { transaction: t });
+    }
+
+    // Обрабатываем авторов, если передан массив authorNames
+    if (req.body.authorNames && Array.isArray(req.body.authorNames)) {
+      const authors = [];
+      for (const name of req.body.authorNames) {
+        let author = await Author.findOne({ where: { name } });
+        if (!author) {
+          author = await Author.create({ name }, { transaction: t });
+        }
+        authors.push(author);
+      }
+      await book.setAuthors(authors, { transaction: t });
+    }
+
+    await t.commit();
+
+    // Возвращаем книгу с авторами
+    const bookWithAuthors = await Book.findByPk(book.id, {
+      include: [{ model: Author, as: "Authors" }],
+    });
+    res.status(201).json(bookWithAuthors);
   } catch (error) {
+    await t.rollback();
     res.status(400).json({ error: error.message });
   }
 });

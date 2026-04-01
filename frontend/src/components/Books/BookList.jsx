@@ -1,10 +1,18 @@
+import React from 'react';
 import BookCard from './BookCard';
+import './BookList.css'; // добавлен импорт
 
-const BookList = ({ books }) => {
+const BookList = ({ books, onAdd, onUpdateStatus, onDelete }) => {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
+    <div className="books-grid">
       {books.map(book => (
-        <BookCard key={book.id} book={book} />
+        <BookCard
+          key={book.id}
+          book={book}
+          onAdd={onAdd}
+          onUpdateStatus={onUpdateStatus}
+          onDelete={onDelete}
+        />
       ))}
     </div>
   );

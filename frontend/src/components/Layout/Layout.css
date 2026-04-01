@@ -1,0 +1,9 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* вся высота окна браузера */
+}
+
+.main-content {
+  flex: 1; /* растягивается, занимая свободное пространство */
+}
