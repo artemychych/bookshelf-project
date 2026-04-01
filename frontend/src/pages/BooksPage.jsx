@@ -1,7 +1,8 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import api from '../services/api';
 import BookList from '../components/Books/BookList';
 import './BooksPage.css';
+
 const popularGenres = ['Fiction', 'Fantasy', 'Science Fiction', 'Mystery', 'Romance', 'Thriller', 'Biography', 'History'];
 
 const BooksPage = () => {
@@ -10,6 +11,16 @@ const BooksPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGenres, setSelectedGenres] = useState([]);
   const [mode, setMode] = useState('discover');
+
+  // Filters for "Моя библиотека"
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedGenresMyBooks, setSelectedGenresMyBooks] = useState([]);
+  const [yearFrom, setYearFrom] = useState('');
+  const [yearTo, setYearTo] = useState('');
+
+  // Filters for "Найти (Open Library)"
+  const [yearFromDiscover, setYearFromDiscover] = useState('');
+  const [yearToDiscover, setYearToDiscover] = useState('');
 
   const debounceTimerRef = useRef(null);
   const cache = useRef(new Map()).current;
@@ -57,7 +68,6 @@ const BooksPage = () => {
     if (mode === 'mybooks') {
       try {
         const res = await api.get('/books');
-        // Добавляем source и приводим авторов к формату authorNames
         const booksWithSource = res.data.map(book => ({
           ...book,
           source: 'database',
@@ -92,7 +102,40 @@ const BooksPage = () => {
     return () => clearTimeout(debounceTimerRef.current);
   }, [loadBooks]);
 
-  // --- Обработчики для работы с библиотекой ---
+  useEffect(() => {
+    if (mode === 'mybooks') {
+      setStatusFilter('all');
+      setSelectedGenresMyBooks([]);
+      setYearFrom('');
+      setYearTo('');
+    }
+  }, [mode]);
+
+  const filteredMyBooks = useMemo(() => {
+    if (mode !== 'mybooks') return [];
+    return books.filter(book => {
+      if (statusFilter !== 'all' && book.status !== statusFilter) return false;
+      if (selectedGenresMyBooks.length > 0) {
+        const bookGenres = book.genres || [];
+        if (!selectedGenresMyBooks.some(g => bookGenres.includes(g))) return false;
+      }
+      const year = book.publishedYear;
+      if (yearFrom && year < Number(yearFrom)) return false;
+      if (yearTo && year > Number(yearTo)) return false;
+      return true;
+    });
+  }, [books, mode, statusFilter, selectedGenresMyBooks, yearFrom, yearTo]);
+
+  const filteredDiscoverBooks = useMemo(() => {
+    if (mode !== 'discover') return [];
+    return books.filter(book => {
+      const year = book.first_publish_year;
+      if (yearFromDiscover && year < Number(yearFromDiscover)) return false;
+      if (yearToDiscover && year > Number(yearToDiscover)) return false;
+      return true;
+    });
+  }, [books, mode, yearFromDiscover, yearToDiscover]);
+
   const handleAddBook = async (book) => {
     try {
       const bookData = {
@@ -100,13 +143,11 @@ const BooksPage = () => {
         coverUrl: book.coverUrl,
         publishedYear: book.first_publish_year || null,
         status: 'want_to_read',
-        externalId: book.id,  // сохраняем ключ Open Library
+        externalId: book.id,
         authorNames: book.authorNames
       };
       await api.post('/books', bookData);
       alert('Книга добавлена в библиотеку!');
-      // Можно сразу переключиться на "Мою библиотеку" или оставить как есть
-      // setMode('mybooks'); // опционально
     } catch (error) {
       console.error('Ошибка добавления:', error);
       alert('Не удалось добавить книгу');
@@ -135,25 +176,42 @@ const BooksPage = () => {
   };
 
   const toggleGenre = (genre) => {
-    setSelectedGenres(prev => 
+    setSelectedGenres(prev =>
       prev.includes(genre) ? prev.filter(g => g !== genre) : [...prev, genre]
     );
   };
 
-  const clearFilters = () => setSelectedGenres([]);
+  const clearDiscoverFilters = () => {
+    setSelectedGenres([]);
+    setYearFromDiscover('');
+    setYearToDiscover('');
+  };
+
+  const toggleGenreMyBooks = (genre) => {
+    setSelectedGenresMyBooks(prev =>
+      prev.includes(genre) ? prev.filter(g => g !== genre) : [...prev, genre]
+    );
+  };
+
+  const clearMyBooksFilters = () => {
+    setStatusFilter('all');
+    setSelectedGenresMyBooks([]);
+    setYearFrom('');
+    setYearTo('');
+  };
 
   return (
-    <div className="books-page"> {/* заменён style на className */}
+    <div className="books-page">
       <h1 className="page-title">📚 Каталог книг</h1>
-      
+     
       <div className="mode-switcher">
-        <button 
+        <button
           onClick={() => setMode('discover')}
           className={`mode-button ${mode === 'discover' ? 'active' : ''}`}
         >
           Найти (Open Library)
         </button>
-        <button 
+        <button
           onClick={() => setMode('mybooks')}
           className={`mode-button ${mode === 'mybooks' ? 'active' : ''}`}
         >
@@ -170,32 +228,148 @@ const BooksPage = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
           />
-          
+         
           <div className="filters-section">
-            <span className="filters-title">Фильтры по жанрам:</span>
-            <div className="genre-checkboxes">
-              {popularGenres.map(genre => (
-                <label key={genre}>
-                  <input 
-                    type="checkbox" 
-                    checked={selectedGenres.includes(genre)}
-                    onChange={() => toggleGenre(genre)}
-                  /> {genre}
-                </label>
-              ))}
-              <button className="clear-filters" onClick={clearFilters}>Сбросить</button>
+            <div style={{ marginBottom: '1rem' }}>
+              <span className="filters-title">Фильтры по жанрам:</span>
+              <div className="genre-checkboxes">
+                {popularGenres.map(genre => (
+                  <label key={genre}>
+                    <input
+                      type="checkbox"
+                      checked={selectedGenres.includes(genre)}
+                      onChange={() => toggleGenre(genre)}
+                    /> {genre}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '1rem' }}>
+              <span className="filters-title">Год:</span>
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                <input
+                  type="number"
+                  placeholder="От"
+                  value={yearFromDiscover}
+                  onChange={(e) => setYearFromDiscover(e.target.value)}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    borderRadius: '20px',
+                    border: '1px solid #ddd',
+                    width: '100px',
+                    fontSize: '0.9rem'
+                  }}
+                />
+                <span>–</span>
+                <input
+                  type="number"
+                  placeholder="До"
+                  value={yearToDiscover}
+                  onChange={(e) => setYearToDiscover(e.target.value)}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    borderRadius: '20px',
+                    border: '1px solid #ddd',
+                    width: '100px',
+                    fontSize: '0.9rem'
+                  }}
+                />
+              </div>
+            </div>
+
+            <div>
+              <button className="clear-filters" onClick={clearDiscoverFilters}>Сбросить</button>
             </div>
           </div>
         </>
       )}
 
+      {mode === 'mybooks' && (
+        <div className="filters-section">
+          <div style={{ marginBottom: '1rem' }}>
+            <span className="filters-title">Статус:</span>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              style={{
+                marginLeft: '0.5rem',
+                padding: '0.5rem 1rem',
+                borderRadius: '20px',
+                border: '1px solid #ddd',
+                fontSize: '0.9rem'
+              }}
+            >
+              <option value="all">Все</option>
+              <option value="read">Прочитано</option>
+              <option value="reading">Читаю</option>
+              <option value="want_to_read">Хочу прочитать</option>
+            </select>
+          </div>
+
+          <div style={{ marginBottom: '1rem' }}>
+            <span className="filters-title">Фильтры по жанрам:</span>
+            <div className="genre-checkboxes" style={{ marginTop: '0.5rem' }}>
+              {popularGenres.map(genre => (
+                <label key={genre}>
+                  <input
+                    type="checkbox"
+                    checked={selectedGenresMyBooks.includes(genre)}
+                    onChange={() => toggleGenreMyBooks(genre)}
+                  /> {genre}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '1rem' }}>
+            <span className="filters-title">Год:</span>
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+              <input
+                type="number"
+                placeholder="От"
+                value={yearFrom}
+                onChange={(e) => setYearFrom(e.target.value)}
+                style={{
+                  padding: '0.5rem 1rem',
+                  borderRadius: '20px',
+                  border: '1px solid #ddd',
+                  width: '100px',
+                  fontSize: '0.9rem'
+                }}
+              />
+              <span>–</span>
+              <input
+                type="number"
+                placeholder="До"
+                value={yearTo}
+                onChange={(e) => setYearTo(e.target.value)}
+                style={{
+                  padding: '0.5rem 1rem',
+                  borderRadius: '20px',
+                  border: '1px solid #ddd',
+                  width: '100px',
+                  fontSize: '0.9rem'
+                }}
+              />
+            </div>
+          </div>
+
+          <div>
+            <button className="clear-filters" onClick={clearMyBooksFilters}>Сбросить</button>
+          </div>
+        </div>
+      )}
+
       {loading ? (
         <p className="loading">Загрузка</p>
-      ) : books.length === 0 ? (
+      ) : mode === 'mybooks' && filteredMyBooks.length === 0 ? (
+        <p className="no-books">Книги не найдены</p>
+      ) : mode === 'discover' && filteredDiscoverBooks.length === 0 ? (
         <p className="no-books">Книги не найдены</p>
       ) : (
         <BookList
-          books={books}
+          books={mode === 'mybooks' ? filteredMyBooks : filteredDiscoverBooks}
           onAdd={handleAddBook}
           onUpdateStatus={handleUpdateStatus}
           onDelete={handleDeleteBook}
