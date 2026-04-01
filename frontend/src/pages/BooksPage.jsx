@@ -176,7 +176,7 @@ const BooksPage = () => {
   };
 
   const toggleGenre = (genre) => {
-    setSelectedGenres(prev => 
+    setSelectedGenres(prev =>
       prev.includes(genre) ? prev.filter(g => g !== genre) : [...prev, genre]
     );
   };
@@ -203,15 +203,15 @@ const BooksPage = () => {
   return (
     <div className="books-page">
       <h1 className="page-title">📚 Каталог книг</h1>
-      
+     
       <div className="mode-switcher">
-        <button 
+        <button
           onClick={() => setMode('discover')}
           className={`mode-button ${mode === 'discover' ? 'active' : ''}`}
         >
           Найти (Open Library)
         </button>
-        <button 
+        <button
           onClick={() => setMode('mybooks')}
           className={`mode-button ${mode === 'mybooks' ? 'active' : ''}`}
         >
@@ -228,15 +228,15 @@ const BooksPage = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
           />
-          
+         
           <div className="filters-section">
             <div style={{ marginBottom: '1rem' }}>
               <span className="filters-title">Фильтры по жанрам:</span>
               <div className="genre-checkboxes">
                 {popularGenres.map(genre => (
                   <label key={genre}>
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={selectedGenres.includes(genre)}
                       onChange={() => toggleGenre(genre)}
                     /> {genre}
