@@ -1,5 +1,5 @@
-"use strict";
-const { Model } = require("sequelize");
+'use strict';
+const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     toJSON() {
@@ -8,7 +8,8 @@ module.exports = (sequelize, DataTypes) => {
       return values;
     }
     static associate(models) {
-      // определите связи, если нужны
+      // Добавляем связь с книгами
+      User.hasMany(models.Book, { foreignKey: 'userId' });
     }
   }
   User.init(
@@ -23,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "User",
+      modelName: 'User',
     },
   );
   return User;

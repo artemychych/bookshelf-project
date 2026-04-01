@@ -1,48 +1,57 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const authMiddleware = require("../middleware/auth");
-const { Book, Author, sequelize } = require("../models");
+const authMiddleware = require('../middleware/auth');
+const { Book, Author, sequelize } = require('../models');
 
 router.use(authMiddleware);
 
-// GET /books – получить все книги
-router.get("/", async (req, res) => {
+// GET /books – получить все книги текущего пользователя
+router.get('/', async (req, res) => {
   try {
-    const books = await Book.findAll({ include: ["Authors"] });
+    const books = await Book.findAll({
+      where: { userId: req.user.id }, // фильтруем по пользователю
+      include: ['Authors'],
+    });
     res.json(books);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// GET /books/:id – получить книгу по id
-router.get("/:id", async (req, res) => {
+// GET /books/:id – получить книгу по id, если она принадлежит пользователю
+router.get('/:id', async (req, res) => {
   try {
-    const book = await Book.findByPk(req.params.id, {
-      include: ["Authors", "Reviews", "Quotes"],
+    const book = await Book.findOne({
+      where: { id: req.params.id, userId: req.user.id },
+      include: ['Authors', 'Reviews', 'Quotes'],
     });
-    if (!book) return res.status(404).json({ message: "Book not found" });
+    if (!book) return res.status(404).json({ message: 'Book not found' });
     res.json(book);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// POST /books – создать новую книгу
-router.post("/", async (req, res) => {
+// POST /books – создать новую книгу с привязкой к пользователю
+router.post('/', async (req, res) => {
   const t = await sequelize.transaction();
   try {
-    // Проверяем, есть ли уже книга с таким externalId
     let book = null;
     if (req.body.externalId) {
-      book = await Book.findOne({ where: { externalId: req.body.externalId } });
+      // Поиск книги по внешнему ID, но только среди книг текущего пользователя
+      book = await Book.findOne({
+        where: { externalId: req.body.externalId, userId: req.user.id },
+      });
     }
 
     if (!book) {
-      // Создаём новую книгу
-      book = await Book.create(req.body, { transaction: t });
+      // Создаём новую книгу с userId текущего пользователя
+      book = await Book.create(
+        { ...req.body, userId: req.user.id },
+        { transaction: t }
+      );
     } else {
-      // Если книга уже есть, можно обновить её поля (опционально)
+      // Если книга уже есть у пользователя, можно обновить её поля
       await book.update(req.body, { transaction: t });
     }
 
@@ -61,9 +70,8 @@ router.post("/", async (req, res) => {
 
     await t.commit();
 
-    // Возвращаем книгу с авторами
     const bookWithAuthors = await Book.findByPk(book.id, {
-      include: [{ model: Author, as: "Authors" }],
+      include: [{ model: Author, as: 'Authors' }],
     });
     res.status(201).json(bookWithAuthors);
   } catch (error) {
@@ -72,11 +80,13 @@ router.post("/", async (req, res) => {
   }
 });
 
-// PUT /books/:id – обновить книгу
-router.put("/:id", async (req, res) => {
+// PUT /books/:id – обновить книгу, только если она принадлежит пользователю
+router.put('/:id', async (req, res) => {
   try {
-    const book = await Book.findByPk(req.params.id);
-    if (!book) return res.status(404).json({ message: "Book not found" });
+    const book = await Book.findOne({
+      where: { id: req.params.id, userId: req.user.id },
+    });
+    if (!book) return res.status(404).json({ message: 'Book not found' });
     await book.update(req.body);
     if (req.body.authorIds) {
       await book.setAuthors(req.body.authorIds);
@@ -87,11 +97,13 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// DELETE /books/:id – удалить книгу
-router.delete("/:id", async (req, res) => {
+// DELETE /books/:id – удалить книгу, только если она принадлежит пользователю
+router.delete('/:id', async (req, res) => {
   try {
-    const book = await Book.findByPk(req.params.id);
-    if (!book) return res.status(404).json({ message: "Book not found" });
+    const book = await Book.findOne({
+      where: { id: req.params.id, userId: req.user.id },
+    });
+    if (!book) return res.status(404).json({ message: 'Book not found' });
     await book.destroy();
     res.status(204).send();
   } catch (error) {
