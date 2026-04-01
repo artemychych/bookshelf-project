@@ -1,7 +1,8 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import api from '../services/api';
 import BookList from '../components/Books/BookList';
 import './BooksPage.css';
+
 const popularGenres = ['Fiction', 'Fantasy', 'Science Fiction', 'Mystery', 'Romance', 'Thriller', 'Biography', 'History'];
 
 const BooksPage = () => {
@@ -10,6 +11,11 @@ const BooksPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGenres, setSelectedGenres] = useState([]);
   const [mode, setMode] = useState('discover');
+
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedGenresMyBooks, setSelectedGenresMyBooks] = useState([]);
+  const [yearFrom, setYearFrom] = useState('');
+  const [yearTo, setYearTo] = useState('');
 
   const debounceTimerRef = useRef(null);
   const cache = useRef(new Map()).current;
@@ -92,7 +98,30 @@ const BooksPage = () => {
     return () => clearTimeout(debounceTimerRef.current);
   }, [loadBooks]);
 
-  // --- Обработчики для работы с библиотекой ---
+  useEffect(() => {
+    if (mode === 'mybooks') {
+      setStatusFilter('all');
+      setSelectedGenresMyBooks([]);
+      setYearFrom('');
+      setYearTo('');
+    }
+  }, [mode]);
+
+  const filteredMyBooks = useMemo(() => {
+    if (mode !== 'mybooks') return [];
+    return books.filter(book => {
+      if (statusFilter !== 'all' && book.status !== statusFilter) return false;
+      if (selectedGenresMyBooks.length > 0) {
+        const bookGenres = book.genres || [];
+        if (!selectedGenresMyBooks.some(g => bookGenres.includes(g))) return false;
+      }
+      const year = book.publishedYear;
+      if (yearFrom && year < Number(yearFrom)) return false;
+      if (yearTo && year > Number(yearTo)) return false;
+      return true;
+    });
+  }, [books, mode, statusFilter, selectedGenresMyBooks, yearFrom, yearTo]);
+
   const handleAddBook = async (book) => {
     try {
       const bookData = {
@@ -100,7 +129,7 @@ const BooksPage = () => {
         coverUrl: book.coverUrl,
         publishedYear: book.first_publish_year || null,
         status: 'want_to_read',
-        externalId: book.id,  // сохраняем ключ Open Library
+        externalId: book.id,  
         authorNames: book.authorNames
       };
       await api.post('/books', bookData);
@@ -142,8 +171,21 @@ const BooksPage = () => {
 
   const clearFilters = () => setSelectedGenres([]);
 
+  const toggleGenreMyBooks = (genre) => {
+    setSelectedGenresMyBooks(prev =>
+      prev.includes(genre) ? prev.filter(g => g !== genre) : [...prev, genre]
+    );
+  };
+
+  const clearMyBooksFilters = () => {
+    setStatusFilter('all');
+    setSelectedGenresMyBooks([]);
+    setYearFrom('');
+    setYearTo('');
+  };
+
   return (
-    <div className="books-page"> {/* заменён style на className */}
+    <div className="books-page">
       <h1 className="page-title">📚 Каталог книг</h1>
       
       <div className="mode-switcher">
@@ -189,13 +231,91 @@ const BooksPage = () => {
         </>
       )}
 
+      {mode === 'mybooks' && (
+        <div className="filters-section">
+          <div style={{ marginBottom: '1rem' }}>
+            <span className="filters-title">Статус:</span>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              style={{
+                marginLeft: '0.5rem',
+                padding: '0.5rem 1rem',
+                borderRadius: '20px',
+                border: '1px solid #ddd',
+                fontSize: '0.9rem'
+              }}
+            >
+              <option value="all">Все</option>
+              <option value="read">Прочитано</option>
+              <option value="reading">Читаю</option>
+              <option value="want_to_read">Хочу прочитать</option>
+            </select>
+          </div>
+
+          <div style={{ marginBottom: '1rem' }}>
+            <span className="filters-title">Жанр:</span>
+            <div className="genre-checkboxes" style={{ marginTop: '0.5rem' }}>
+              {popularGenres.map(genre => (
+                <label key={genre}>
+                  <input
+                    type="checkbox"
+                    checked={selectedGenresMyBooks.includes(genre)}
+                    onChange={() => toggleGenreMyBooks(genre)}
+                  /> {genre}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '1rem' }}>
+            <span className="filters-title">Год:</span>
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+              <input
+                type="number"
+                placeholder="От"
+                value={yearFrom}
+                onChange={(e) => setYearFrom(e.target.value)}
+                style={{
+                  padding: '0.5rem 1rem',
+                  borderRadius: '20px',
+                  border: '1px solid #ddd',
+                  width: '100px',
+                  fontSize: '0.9rem'
+                }}
+              />
+              <span>–</span>
+              <input
+                type="number"
+                placeholder="До"
+                value={yearTo}
+                onChange={(e) => setYearTo(e.target.value)}
+                style={{
+                  padding: '0.5rem 1rem',
+                  borderRadius: '20px',
+                  border: '1px solid #ddd',
+                  width: '100px',
+                  fontSize: '0.9rem'
+                }}
+              />
+            </div>
+          </div>
+
+          <div>
+            <button className="clear-filters" onClick={clearMyBooksFilters}>Сбросить</button>
+          </div>
+        </div>
+      )}
+
       {loading ? (
         <p className="loading">Загрузка</p>
-      ) : books.length === 0 ? (
+      ) : mode === 'mybooks' && filteredMyBooks.length === 0 ? (
+        <p className="no-books">Книги не найдены</p>
+      ) : mode === 'discover' && books.length === 0 ? (
         <p className="no-books">Книги не найдены</p>
       ) : (
         <BookList
-          books={books}
+          books={mode === 'mybooks' ? filteredMyBooks : books}
           onAdd={handleAddBook}
           onUpdateStatus={handleUpdateStatus}
           onDelete={handleDeleteBook}
