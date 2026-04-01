@@ -1,0 +1,131 @@
+.homepage {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #2c3e50;
+  line-height: 1.6;
+}
+
+/* Hero section */
+.hero {
+  text-align: center;
+  padding: 80px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+  margin-bottom: 40px;
+}
+
+.hero h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.hero p {
+  font-size: 1.3rem;
+  max-width: 600px;
+  margin: 0 auto 2rem;
+  opacity: 0.9;
+}
+
+.hero .btn-primary {
+  background: white;
+  color: #667eea;
+  border: none;
+  padding: 12px 30px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.hero .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Features section */
+.features {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.feature-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 35px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.feature-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #2c3e50;
+}
+
+.feature-card p {
+  color: #7f8c8d;
+  font-size: 0.95rem;
+}
+
+/* Call to action */
+.cta {
+  background: #f8f9fa;
+  text-align: center;
+  padding: 60px 20px;
+  margin-top: 20px;
+  border-top: 1px solid #e9ecef;
+}
+
+.cta h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.cta .btn-secondary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+  margin-top: 1rem;
+}
+
+.cta .btn-secondary:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 2rem;
+  }
+  .hero p {
+    font-size: 1rem;
+  }
+  .features {
+    gap: 1.5rem;
+  }
+}
