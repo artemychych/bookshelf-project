@@ -15,6 +15,8 @@ services:
       - "127.0.0.1:5433:5432"   # БД доступна только локально для бэкапов
     networks:
       - bookshelf_network
+    env_file:
+      - .env
 
   backend:
     build:
@@ -25,6 +27,7 @@ services:
     depends_on:
       - db
     environment:
+      NODE_ENV: production
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_NAME: ${POSTGRES_DB}
@@ -41,6 +44,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    env_file:
+      - .env
 
   frontend:
     build:
