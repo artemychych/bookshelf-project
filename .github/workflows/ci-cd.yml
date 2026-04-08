@@ -47,6 +47,9 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Start test environment
         run: docker compose -f docker-compose.e2e.yml up -d --build
+      - name: Show logs if backend failed
+        if: failure() || always()
+        run: docker compose -f docker-compose.e2e.yml logs backend
       - name: Wait for services to be healthy
         run: |
           for service in db backend frontend; do
