@@ -3,6 +3,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const { sequelize } = require("./models");
 const authRoutes = require("./routes/auth");
+const healthRouter = require("./routes/health");
 
 dotenv.config();
 const app = express();
@@ -31,3 +32,4 @@ app.listen(PORT, async () => {
 const booksRouter = require("./routes/books");
 app.use("/api/books", booksRouter);
 app.use("/api/auth", authRoutes);
+app.use("/api", healthRouter);
