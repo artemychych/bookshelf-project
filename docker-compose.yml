@@ -36,11 +36,6 @@ services:
     # Не открываем порт бэкенда наружу – он работает только внутри сети Docker
     networks:
       - bookshelf_network
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   frontend:
     build:
@@ -54,11 +49,6 @@ services:
       - "6636:80"                  # Открываем порт 80 на хосте
     networks:
       - bookshelf_network
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]   # или curl
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
 volumes:
   postgres_data:
