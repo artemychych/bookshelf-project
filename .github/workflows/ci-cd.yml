@@ -46,12 +46,12 @@ jobs:
           npm install
           npx playwright install --with-deps chromium
       - name: Start test environment
-        run: docker-compose -f docker-compose.e2e.yml up -d --build
+        run: docker compose -f docker-compose.e2e.yml up -d --build
       - name: Wait for services to be healthy
         run: |
           for service in db backend frontend; do
             echo "Waiting for $service..."
-            while [ "$(docker inspect --format='{{.State.Health.Status}}' $(docker-compose -f docker-compose.e2e.yml ps -q $service))" != "healthy" ]; do
+            while [ "$(docker inspect --format='{{.State.Health.Status}}' $(docker compose -f docker-compose.e2e.yml ps -q $service))" != "healthy" ]; do
               sleep 2
             done
           done
@@ -65,7 +65,7 @@ jobs:
           path: e2e/test-results/
       - name: Stop containers
         if: always()
-        run: docker-compose -f docker-compose.e2e.yml down
+        run: docker compose -f docker-compose.e2e.yml down
 
   build-docker:
     runs-on: ubuntu-latest
@@ -99,12 +99,12 @@ jobs:
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'ENDSSH'
             cd ${{ secrets.DEPLOY_PATH }}
-            docker-compose -f docker-compose.prod.yml down --remove-orphans || true
-            docker-compose -f docker-compose.prod.yml up -d --build
+            docker compose -f docker-compose.prod.yml down --remove-orphans || true
+            docker compose -f docker-compose.prod.yml up -d --build
             sleep 10
-            docker-compose -f docker-compose.prod.yml exec -T backend npm run migrate
+            docker compose -f docker-compose.prod.yml exec -T backend npm run migrate
             for service in backend frontend; do
-              if [ "$(docker inspect --format='{{.State.Health.Status}}' $(docker-compose -f docker-compose.prod.yml ps -q $service))" != "healthy" ]; then
+              if [ "$(docker inspect --format='{{.State.Health.Status}}' $(docker compose -f docker-compose.prod.yml ps -q $service))" != "healthy" ]; then
                 echo "Service $service is not healthy!"
                 exit 1
               fi
