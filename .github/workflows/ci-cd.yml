@@ -15,7 +15,7 @@ jobs:
         with:
           node-version: '18'
       - name: Install frontend dependencies
-        run: cd frontend && npm ci
+        run: cd frontend && npm install
       - name: Run linter
         run: cd frontend && npm run lint || echo "No lint script"
       - name: Run unit tests
@@ -29,7 +29,7 @@ jobs:
         with:
           node-version: '18'
       - name: Install backend dependencies
-        run: cd backend && npm ci
+        run: cd backend && npm install
       - name: Run linter
         run: cd backend && npm run lint || echo "No lint script"
       - name: Run unit tests
@@ -43,7 +43,7 @@ jobs:
       - name: Install Playwright
         run: |
           cd e2e
-          npm ci
+          npm install
           npx playwright install --with-deps chromium
       - name: Start test environment
         run: docker-compose -f docker-compose.e2e.yml up -d --build
