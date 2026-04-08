@@ -96,7 +96,7 @@ jobs:
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
       - name: Sync files via rsync
         run: |
-          rsync -avz --delete --exclude='.git' --exclude='node_modules' --exclude='e2e' \
+          rsync -avz --delete --exclude='.git' --exclude='node_modules' --exclude='e2e' --exclude='.env' \
             ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.DEPLOY_PATH }}/
       - name: Deploy and run migrations
         run: |
