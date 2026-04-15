@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider } from './context/AuthContext';
+import StatisticsPage from './pages/StatisticsPage';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route element={<PrivateRoute />}>
               <Route path="/" element={<HomePage />} />
               <Route path="/books" element={<BooksPage />} />
+              <Route path="/statistics" element={<StatisticsPage />} />
             </Route>
           </Routes>
         </Layout>
