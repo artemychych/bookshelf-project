@@ -72,10 +72,10 @@ const BookCard = ({
     setError(null);
   };
 
-  const openReadReviewsModal = () => {
-    setError(null);
-    setIsReadReviewsModalOpen(true);
-  };
+  // const openReadReviewsModal = () => {
+  //   setError(null);
+  //   setIsReadReviewsModalOpen(true);
+  // };
 
   const closeReadReviewsModal = () => {
     setIsReadReviewsModalOpen(false);
@@ -163,9 +163,9 @@ const BookCard = ({
             <button className="add-button" onClick={() => onAdd(book)}>
               ➕ Добавить
             </button>
-            <button className="read-reviews-button" onClick={openReadReviewsModal}>
+            {/* <button className="read-reviews-button" onClick={openReadReviewsModal}>
               💬 Рецензии
-            </button>
+            </button> */}
           </div>
         )}
 
