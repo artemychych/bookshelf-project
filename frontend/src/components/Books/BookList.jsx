@@ -2,7 +2,10 @@ import React from 'react';
 import BookCard from './BookCard';
 import './BookList.css'; // добавлен импорт
 
-const BookList = ({ books, onAdd, onUpdateStatus, onDelete }) => {
+const BookList = ({ books, onAdd, onUpdateStatus, onDelete, onFetchReviews,
+  onFetchMyReview,
+  onSubmitReview,
+  onDeleteReview }) => {
   return (
     <div className="books-grid">
       {books.map(book => (
@@ -12,6 +15,10 @@ const BookList = ({ books, onAdd, onUpdateStatus, onDelete }) => {
           onAdd={onAdd}
           onUpdateStatus={onUpdateStatus}
           onDelete={onDelete}
+          onFetchReviews={onFetchReviews}
+          onFetchMyReview={onFetchMyReview}
+          onSubmitReview={onSubmitReview}
+          onDeleteReview={onDeleteReview}
         />
       ))}
     </div>

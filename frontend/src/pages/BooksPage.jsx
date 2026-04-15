@@ -200,6 +200,57 @@ const BooksPage = () => {
     setYearTo('');
   };
 
+  // --- Функции для работы с рецензиями ---
+
+  const fetchReviews = useCallback(async (bookId) => {
+    try {
+      const res = await api.get(`/books/${bookId}/reviews`);
+      return res.data;
+    } catch (err) {
+      console.error('Ошибка загрузки рецензий:', err);
+      throw err;
+    }
+  }, []);
+
+  const fetchMyReview = useCallback(async (bookId) => {
+    try {
+      const res = await api.get(`/books/${bookId}/reviews/me`);
+      return res.data; // если нет, вернёт null (бэкенд отдаёт null или 204?)
+    } catch (err) {
+      if (err.response && err.response.status === 404) {
+        return null;
+      }
+      console.error('Ошибка загрузки моей рецензии:', err);
+      throw err;
+    }
+  }, []);
+
+  const submitReview = useCallback(async (bookId, rating, content, reviewId) => {
+    try {
+      if (reviewId) {
+        // редактирование
+        const res = await api.put(`/books/${bookId}/reviews/${reviewId}`, { rating, content });
+        return res.data;
+      } else {
+        // создание
+        const res = await api.post(`/books/${bookId}/reviews`, { rating, content });
+        return res.data;
+      }
+    } catch (err) {
+      console.error('Ошибка сохранения рецензии:', err);
+      throw err;
+    }
+  }, []);
+
+  const deleteReview = useCallback(async (bookId, reviewId) => {
+    try {
+      await api.delete(`/books/${bookId}/reviews/${reviewId}`);
+    } catch (err) {
+      console.error('Ошибка удаления рецензии:', err);
+      throw err;
+    }
+  }, []);
+
   return (
     <div className="books-page">
       <h1 className="page-title">📚 Каталог книг</h1>
@@ -373,6 +424,10 @@ const BooksPage = () => {
           onAdd={handleAddBook}
           onUpdateStatus={handleUpdateStatus}
           onDelete={handleDeleteBook}
+          onFetchReviews={fetchReviews}
+          onFetchMyReview={fetchMyReview}
+          onSubmitReview={submitReview}
+          onDeleteReview={deleteReview}
         />
       )}
     </div>

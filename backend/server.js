@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const { sequelize } = require("./models");
 const authRoutes = require("./routes/auth");
 const healthRouter = require("./routes/health");
+const reviewsRouter = require("./routes/reviews");
 
 dotenv.config();
 const app = express();
@@ -33,3 +34,4 @@ const booksRouter = require("./routes/books");
 app.use("/api/books", booksRouter);
 app.use("/api/auth", authRoutes);
 app.use("/api", healthRouter);
+app.use("/api/books/:bookId/reviews", reviewsRouter);

@@ -206,7 +206,9 @@
   font-size: 2.2rem;
   color: #ddd;
   cursor: pointer;
-  transition: color 0.15s, transform 0.1s;
+  transition:
+    color 0.15s,
+    transform 0.1s;
   user-select: none;
 }
 
@@ -228,7 +230,9 @@
   font-size: 1rem;
   font-family: inherit;
   resize: vertical;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
   box-sizing: border-box;
   margin-bottom: 1.8rem;
 }
@@ -278,8 +282,12 @@
 
 /* Анимации */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
@@ -424,4 +432,35 @@
 
 .reviews-list::-webkit-scrollbar-thumb:hover {
   background: #a0aec0;
+}
+
+.loading,
+.error-message,
+.no-reviews {
+  text-align: center;
+  padding: 1rem;
+  color: #666;
+}
+
+.error-message {
+  color: #d32f2f;
+}
+
+.delete-review-button {
+  background-color: #ffebee;
+  color: #d32f2f;
+  border: 1px solid #ffcdd2;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  margin-right: auto;
+}
+
+.delete-review-button:hover {
+  background-color: #ffcdd2;
+}
+
+.delete-review-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
