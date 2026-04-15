@@ -21,6 +21,7 @@ const Header = () => {
             </>
           ) : (
             <>
+              <li><Link to="/statistics">📊 Моя статистика</Link></li>
               <li><span className="user-name">Привет, {user.name}</span></li>
               <li><button className="logout-btn" onClick={logout}>Выйти</button></li>
             </>
