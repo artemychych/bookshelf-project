@@ -23,6 +23,10 @@ jobs:
 
   lint-and-test-backend:
     runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      JWT_SECRET: ${{ secrets.JWT_SECRET || 'test-secret-key-for-ci' }}
+      JWT_EXPIRES_IN: 1h
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
